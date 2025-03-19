@@ -2,7 +2,12 @@ from PIL import Image
 from pathlib import Path
 from os import rename, scandir
 from datetime import datetime
+import shutil 
+from threading import Thread
+from threading import Semaphore
 #functions to clean up pictures
+thread_lock = Semaphore(6)
+
 def find_duplicates():
     #find all duplicates in the directory
     #return a list of the duplicates
@@ -17,22 +22,71 @@ def find_pictures(folder, root=False) -> list:
             if entry.is_dir() and root == True:
                 for pic in find_pictures(entry.path,root=root):
                     picture_list.append(pic)
-            elif entry.is_file() and entry.name.endswith(('.jpg', '.jpeg', '.png', '.gif','JPEG','JPG','PNG')):
+            elif entry.is_file() and entry.name.endswith(('.jpg', '.jpeg', '.png', '.gif','JPEG','JPG','PNG','RAF')):
                 picture_list.append(entry.path)
     return picture_list
 
 def move_pictures(pictures, new_folder, sort=False):
     #move all pictures in the list to the new folder
+    thread_list = list()
+    thread_lock.acquire()
+    while len(pictures) > 200:
+        t1 = Thread(target=move_pictures, args=(pictures[:199],new_folder,sort))
+        thread_list.append(t1)
+        t1.start()
+        pictures = pictures[199:]
     for picture in pictures:
-        try:
-            if sort:
-                new_path = sort_pictures(picture,new_folder)
-            else:
-                new_path = Path.joinpath(Path(new_folder),Path(picture).name)
-            rename(picture, new_path)
-        except Exception as e:
-            print(e)
+        move_picture(picture,new_folder,sort)
+    thread_lock.release()
+    while thread_list:
+        for t in thread_list:
+            print('Thread wird gejoint: ' + str(t))
+            t = Thread()
+            if t.is_alive(): pass
+            else: 
+                t.join()
+                thread_list.pop(t)
         
+def move_picture(picture,new_folder, sort):
+    try:
+        if sort:
+            new_path = sort_pictures(picture,new_folder)
+        else:
+                new_path = Path.joinpath(Path(new_folder),Path(picture).name)
+        shutil.move(picture, new_path)
+    except Exception as e:
+        print(e)
+
+def copy_pictures(pictures, new_folder, sort=False):
+    #move all pictures in the list to the new folder
+    thread_list = list()
+    thread_lock.acquire()
+    while len(pictures) > 200:
+        t1 = Thread(target=copy_pictures, args=(pictures[:199],new_folder,sort))
+        thread_list.append(t1)
+        t1.start()
+        pictures = pictures[199:]
+    for picture in pictures:
+        copy_picture(picture,new_folder,sort)
+    thread_lock.release()
+    while thread_list:
+        for t in thread_list:
+            print('Copy Thread wird gejoint: ' + str(t))
+            t = Thread()
+            if t.is_alive(): pass
+            else: 
+                t.join()
+                thread_list.pop(t)
+
+def copy_picture(picture,new_folder, sort):
+    try:
+        if sort:
+            new_path = sort_pictures(picture,new_folder)
+        else:
+                new_path = Path.joinpath(Path(new_folder),Path(picture).name)
+        shutil.copy2(picture, new_path)
+    except Exception as e:
+        print(e)
 
 def get_picture_date(picture):
     try:
@@ -46,6 +100,7 @@ def get_picture_date(picture):
             return False
     except Exception as e:
         print(f'Fehler in function get_picture_date: {picture}: {e}')
+        return False
 
 
 def sort_pictures(picture,new_folder):

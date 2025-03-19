@@ -16,8 +16,9 @@ class picture_window:
         self.rooting_var = tk.BooleanVar()
         self.sort_var = tk.BooleanVar()
         self.target = False
-        self.choose_folder_button = tk.Button(self.root,text='choose directory',command=self.find_pictures)
         self.move_pictures_button = tk.Button(self.root,text='move images',command= self.move_pictures)
+        self.copy_pictures_button = tk.Button(self.root,text='copy images',command= self.copy_pictures)
+        self.choose_folder_button = tk.Button(self.root,text='choose root directory',command=self.find_pictures)
         self.choose_target_folder = tk.Button(self.root,text='choose target directory',command=self.choose_target)
         self.found_pictures_text = tk.Text(self.root)
         self.found_pictures_text['state'] = 'disabled'
@@ -25,8 +26,9 @@ class picture_window:
         self.sort = tk.Checkbutton(self.root,text='Sort by date',variable=self.sort_var)
        
         self.choose_folder_button.grid(row=0,column=0)
-        self.move_pictures_button.grid(row=0,column=1)
-        self.choose_target_folder.grid(row=1,column=0,padx=10)
+        self.move_pictures_button.grid(row=1,column=1)
+        self.copy_pictures_button.grid(row=1,column=0)
+        self.choose_target_folder.grid(row=0,column=1,padx=10)
         self.found_pictures_text.grid(row=0,column=3,rowspan=3)
         self.rooting.grid(row=2,column=1)
         self.sort.grid(row=2,column=0)
@@ -39,7 +41,18 @@ class picture_window:
             return
         try:
             if messagebox.askokcancel('Continue?','Are you sure, you want to move all selected pictures?'):
-                cl.move_pictures(self.found_pictures, self.target_folder,sort=self.sort_var.get())
+                cl.move_pictures(self.found_pictures,self.target_folder,self.sort_var.get())
+        except Exception as e:
+            messagebox.showerror('Error', e)
+        self.sync_pictures_in_folder()
+    
+    def copy_pictures(self):
+        if not self.target: 
+            messagebox.showinfo('Info', 'Please choose a target directory')
+            return
+        try:
+            if messagebox.askokcancel('Continue?','Are you sure, you want to move all selected pictures?'):
+                cl.copy_pictures(self.found_pictures,self.target_folder,self.sort_var.get())    
         except Exception as e:
             messagebox.showerror('Error', e)
         self.sync_pictures_in_folder()
