@@ -2,6 +2,13 @@ import tkinter as tk
 from pathlib import Path
 from tkinter import filedialog, messagebox
 
+# simple color palette for the window
+BACKGROUND_COLOR = "#e9f4ff"  # light blue
+BUTTON_COLOR = "#ffc0cb"      # pink
+BUTTON_ACTIVE = "#ff9bb3"     # darker pink when active
+TEXT_BACKGROUND = "#f7fbff"   # very light blue for the text area
+DEFAULT_FONT = ("Helvetica", 11)
+
 import clean_up_pictures as cl
 
 
@@ -11,6 +18,8 @@ class picture_window:
         self.root = tk.Tk()
         self.root.title("Cleaner Folders")
         self.root.geometry("1100x500")
+        # apply main window styling
+        self.root.configure(bg=BACKGROUND_COLOR, padx=10, pady=10)
         self.found_pictures = list()
         self.picture_folder = Path()
         self.target_folder = Path()
@@ -18,33 +27,82 @@ class picture_window:
         self.sort_var = tk.BooleanVar()
         self.target = False
         self.move_pictures_button = tk.Button(
-            self.root, text="move images", command=self.move_pictures
+            self.root,
+            text="Move images",
+            command=self.move_pictures,
+            bg=BUTTON_COLOR,
+            activebackground=BUTTON_ACTIVE,
+            fg="black",
+            font=DEFAULT_FONT,
+            relief=tk.FLAT,
         )
         self.copy_pictures_button = tk.Button(
-            self.root, text="copy images", command=self.copy_pictures
+            self.root,
+            text="Copy images",
+            command=self.copy_pictures,
+            bg=BUTTON_COLOR,
+            activebackground=BUTTON_ACTIVE,
+            fg="black",
+            font=DEFAULT_FONT,
+            relief=tk.FLAT,
         )
         self.choose_folder_button = tk.Button(
-            self.root, text="choose root directory", command=self.find_pictures
+            self.root,
+            text="Choose root directory",
+            command=self.find_pictures,
+            bg=BUTTON_COLOR,
+            activebackground=BUTTON_ACTIVE,
+            fg="black",
+            font=DEFAULT_FONT,
+            relief=tk.FLAT,
         )
         self.choose_target_folder = tk.Button(
-            self.root, text="choose target directory", command=self.choose_target
+            self.root,
+            text="Choose target directory",
+            command=self.choose_target,
+            bg=BUTTON_COLOR,
+            activebackground=BUTTON_ACTIVE,
+            fg="black",
+            font=DEFAULT_FONT,
+            relief=tk.FLAT,
         )
-        self.found_pictures_text = tk.Text(self.root)
+        self.found_pictures_text = tk.Text(
+            self.root,
+            bg=TEXT_BACKGROUND,
+            font=DEFAULT_FONT,
+            relief=tk.FLAT,
+            height=20,
+        )
         self.found_pictures_text["state"] = "disabled"
         self.rooting = tk.Checkbutton(
-            self.root, text="include underlying directories?", variable=self.rooting_var
+            self.root,
+            text="Include subdirectories?",
+            variable=self.rooting_var,
+            bg=BACKGROUND_COLOR,
+            selectcolor=BUTTON_COLOR,
+            activebackground=BACKGROUND_COLOR,
+            font=DEFAULT_FONT,
         )
         self.sort = tk.Checkbutton(
-            self.root, text="Sort by date", variable=self.sort_var
+            self.root,
+            text="Sort by date",
+            variable=self.sort_var,
+            bg=BACKGROUND_COLOR,
+            selectcolor=BUTTON_COLOR,
+            activebackground=BACKGROUND_COLOR,
+            font=DEFAULT_FONT,
         )
 
-        self.choose_folder_button.grid(row=0, column=0)
-        self.move_pictures_button.grid(row=1, column=1)
-        self.copy_pictures_button.grid(row=1, column=0)
-        self.choose_target_folder.grid(row=0, column=1, padx=10)
-        self.found_pictures_text.grid(row=0, column=3, rowspan=3)
-        self.rooting.grid(row=2, column=1)
-        self.sort.grid(row=2, column=0)
+        self.choose_folder_button.grid(row=0, column=0, padx=10, pady=10, sticky="ew")
+        self.move_pictures_button.grid(row=1, column=1, padx=10, pady=5, sticky="ew")
+        self.copy_pictures_button.grid(row=1, column=0, padx=10, pady=5, sticky="ew")
+        self.choose_target_folder.grid(row=0, column=1, padx=10, pady=10, sticky="ew")
+        self.found_pictures_text.grid(row=0, column=3, rowspan=3, padx=10, pady=10, sticky="nsew")
+        self.rooting.grid(row=2, column=1, padx=10, pady=5, sticky="w")
+        self.sort.grid(row=2, column=0, padx=10, pady=5, sticky="w")
+        # make the text widget expand with the window
+        self.root.grid_columnconfigure(3, weight=1)
+        self.root.grid_rowconfigure(0, weight=1)
 
         self.root.mainloop()
 
